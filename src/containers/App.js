@@ -1,15 +1,28 @@
 import React, { Component } from 'react'
+import {connect} from 'react-redux'
 import Scroll from '../components/Scroll'
 import ErrorBoundry from '../components/ErrorBoundry'
 import CardList from '../components/CardList'
 import SearchList from '../components/SearchList'
+import { setSearch } from '../actions'
+
+const matchStateToProps = state => {
+    return {
+        searchField: state.searchField
+    }
+}
+
+const matchDispatchToProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => dispatch(setSearch(event.target.value))
+    }
+}
 
 class App extends Component { 
     constructor(){
         super()
         this.state ={
-            robots: [],
-            SearchRobots: ''
+            robots: []
         }
     }
     componentDidMount(){
@@ -18,14 +31,11 @@ class App extends Component {
             .then(users => this.setState({robots:users}))
     }
 
-    onSearchChange = (event) => {
-        this.setState({SearchRobots:event.target.value})
-    }
-
     render(){
-        const { robots, SearchRobots } = this.state;
+        const { robots } = this.state;
+        const { searchField, onSearchChange } = this.props;
         const filterRobots = robots.filter(robot => {
-            return robot.name.toLowerCase().includes(SearchRobots.toLowerCase());
+            return robot.name.toLowerCase().includes(searchField.toLowerCase());
         })
 
         return !robots.length ?
@@ -33,7 +43,7 @@ class App extends Component {
             (
                 <div className="tc">
                     <h1>Robots</h1>
-                    <SearchList searchChange={this.onSearchChange}></SearchList>
+                    <SearchList searchChange={onSearchChange}></SearchList>
                     <Scroll>
                         <ErrorBoundry>
                             <CardList robots={filterRobots}/>
@@ -43,4 +53,4 @@ class App extends Component {
             )
     }
 }
-export default App 
+export default connect(matchStateToProps, matchDispatchToProps)(App) 
